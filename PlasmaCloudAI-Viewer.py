@@ -52,7 +52,12 @@ class PixelPredictionCNN(nn.Module):
         return x
 
 # Datei, in der das vortrainierte Modell liegen soll
-MODEL_PATH = 'e:/prg/KI-Chat/LocalPyth_empt/PixelKI/CloudKI/model/plasma_model.pth'
+# Pfad zum aktuellen Verzeichnis
+current_dir = os.path.dirname(os.path.realpath(__file__))
+
+# Absoluter Pfad zum Modell
+MODEL_PATH = os.path.join(current_dir, 'model', 'plasma_model.pth')
+#MODEL_PATH = 'model/plasma_model.pth'
 
 def load_model(model, filename=MODEL_PATH):
     if os.path.exists(filename):
