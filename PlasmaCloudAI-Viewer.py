@@ -1,10 +1,8 @@
 import torch
 import torch.nn as nn
 import os
-import random
 import numpy as np
 import pygame
-from torchvision import transforms
 from PIL import Image, ImageFilter
 
 # Überprüfen, ob eine GPU verfügbar ist
