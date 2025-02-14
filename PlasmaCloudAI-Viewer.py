@@ -52,12 +52,7 @@ class PixelPredictionCNN(nn.Module):
         return x
 
 # Datei, in der das vortrainierte Modell liegen soll
-# Pfad zum aktuellen Verzeichnis
-current_dir = os.path.dirname(os.path.realpath(__file__))
-
-# Absoluter Pfad zum Modell
-MODEL_PATH = os.path.join(current_dir, 'model', 'plasma_model.pth')
-#MODEL_PATH = 'model/plasma_model.pth'
+MODEL_PATH = 'e:/prg/KI-Chat/LocalPyth_empt/PixelKI/CloudKI/model/plasma_model.pth'
 
 def load_model(model, filename=MODEL_PATH):
     if os.path.exists(filename):
@@ -77,7 +72,7 @@ Noize = 0.325
 
 # Klasse für stabilen, zeitabhängigen Noise
 class StableNoise:
-    def __init__(self, shape, theta=0.0211, sigma=Noize, mu=0.0, dt=1.0):
+    def __init__(self, shape, theta=0.0211, sigma=Noize, mu=0.1, dt=1.1):
         self.theta = theta
         self.sigma = sigma
         self.mu = mu
@@ -91,19 +86,30 @@ class StableNoise:
         normal_sample = torch.randn_like(self.noise).to(device)
         self.noise += self.theta * (self.mu - self.noise) * self.dt + self.sigma * (self.dt ** 0.5) * normal_sample
         return self.noise
-
+    def update(self, theta, sigma):
+        self.theta = theta
+        self.sigma = sigma
 stable_noise = None
-
+theta_run = 0.015
+Noize_run = 0.375
 # Funktion zur Vorhersage des nächsten Bildes anhand des aktuellen Eingabebildes
 def predict_next_image(input_image):
     global stable_noise
+    global theta_run
+    global Noize_run
     input_image = input_image.to(device)
     latent = model.encoder(input_image)
     
     # Initialisiere Noise-Objekt, falls noch nicht vorhanden oder bei Formänderung
     if stable_noise is None or stable_noise.noise.shape != latent.shape:
         stable_noise = StableNoise(latent.shape)
-    
+    theta_run += 0.001
+    if theta_run > 0.06:
+        theta_run = 0.009
+    Noize_run += 0.001
+    if Noize_run > 0.6:
+        Noize_run = 0.475
+    stable_noise.update(theta_run, Noize)    
     noise = stable_noise.sample()
     latent_noisy = latent + noise
     with torch.no_grad():
